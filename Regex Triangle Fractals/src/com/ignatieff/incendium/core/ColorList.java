@@ -1,4 +1,4 @@
-package com.ignatieff.tractals;
+package com.ignatieff.incendium.core;
 
 import java.awt.Color;
 

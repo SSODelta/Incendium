@@ -1,4 +1,4 @@
-package com.ignatieff.tractals;
+package com.ignatieff.incendium.core;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -43,11 +43,10 @@ public class Animator {
 		this.depth    = depth;
 		
 		
-		p = new Parser(f_degree);
+		p = new Parser(f_degree, depth, regex);
 		
-		p.generateAllStrings(depth);
+		p.generateAllStrings();
 		
-		p.removeNonMatches(regex);
 		p.sort();
 	}
 	

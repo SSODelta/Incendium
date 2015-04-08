@@ -1,4 +1,4 @@
-package com.ignatieff.tractals.gui;
+package com.ignatieff.incendium.gui;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -10,9 +10,7 @@ import java.awt.event.MouseMotionListener;
 import javax.swing.JColorChooser;
 import javax.swing.JPanel;
 
-import org.apache.commons.math3.exception.OutOfRangeException;
-
-import com.ignatieff.tractals.ColorList;
+import com.ignatieff.incendium.core.ColorList;
 
 public class ColorChooser extends JPanel implements MouseListener, MouseMotionListener {
 	

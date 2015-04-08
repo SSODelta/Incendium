@@ -1,4 +1,4 @@
-package com.ignatieff.tractals.gui;
+package com.ignatieff.incendium.gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -41,10 +42,10 @@ import org.matheclipse.parser.client.eval.DoubleEvaluator;
 import org.matheclipse.parser.client.eval.DoubleVariable;
 import org.matheclipse.parser.client.eval.IDoubleValue;
 
-import com.ignatieff.tractals.Animator;
-import com.ignatieff.tractals.ColorList;
-import com.ignatieff.tractals.Parser;
-import com.ignatieff.tractals.Renderer;
+import com.ignatieff.incendium.core.Animator;
+import com.ignatieff.incendium.core.ColorList;
+import com.ignatieff.incendium.core.Parser;
+import com.ignatieff.incendium.core.Renderer;
 
 public class GUI_main {
 	
@@ -82,7 +83,7 @@ public class GUI_main {
 	private double decay;
 	private String f_degree, output;
 	private Timer t_progress;
-	private boolean done, CONTROL;
+	private boolean done, CONTROL, SHIFT;
 	private static FileFilter 	filter_webm = new FileFilter() {
 		public String getDescription() {
 			return "WEBM Image Files (*.webm)";
@@ -98,6 +99,14 @@ public class GUI_main {
 		
 		public boolean accept(File f) {
 			return f.getName().toLowerCase().endsWith(".inc");
+		}
+	},							filter_imgs = new FileFilter() {
+		public String getDescription() {
+			return "Portable Network Graphics (*.png)";
+		}
+		
+		public boolean accept(File f) {
+			return f.getName().toLowerCase().endsWith(".png");
 		}
 	};
 	
@@ -123,6 +132,7 @@ public class GUI_main {
 		frame = new JFrame("Incendium - Fractal animation editor");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		status_text="Default";
+		
 		c = new GridBagConstraints();
 		content = new JLabel(new ImageIcon(new BufferedImage(1,1,BufferedImage.TYPE_INT_RGB))){
 			/**
@@ -146,8 +156,15 @@ public class GUI_main {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(a==null || PROG_BAR==null)return;
-				PROG_BAR.setValue((int)(100*a.progress));
+				
+				if(PROG_BAR==null)return;
+				
+				int prog_a = 100, prog_prev = 100;
+				
+				if(a!=null)prog_a=(int)(100*a.progress);
+				if(previewThread!=null)prog_prev=previewThread.getProgress();
+			
+				PROG_BAR.setValue(Math.min(prog_a, prog_prev));
 			}});
 
 		
@@ -183,15 +200,7 @@ public class GUI_main {
 		drawCurrentSetting(false);
 	}
 	
-	public void drawCurrentSetting(boolean override){
-		
-		if(!done){return;}
-		
-		done=false;
-		status_text = "Loading frame "+(current_frame+1)+"...";
-		content.repaint();
-		
-		frame.requestFocus();
+	public FrameSettings getFrameSettings(){
 		it.setValue(current_frame);
 		regex = TEXT_REGEX.getText();
 		depth = Integer.parseInt(TEXT_FRACTAL_DEPTH.getText());
@@ -202,7 +211,20 @@ public class GUI_main {
 		
 		changeColorSize(depth+1);
 		
-		FrameSettings fs = new FrameSettings(regex, cc.getColorList(),0,depth,rot,decay,f_degree);
+		return new FrameSettings(regex, cc.getColorList(),0,depth,rot,decay,f_degree);
+	}
+	
+	public void drawCurrentSetting(boolean override){
+		
+		if(!done){return;}
+		
+		done=false;
+		status_text = "Loading frame "+(current_frame+1)+"...";
+		content.repaint();
+		
+		frame.requestFocus();
+		
+		FrameSettings fs = getFrameSettings();
 		if(!override && FRAMES.containsKey(current_frame)){
 			status_text = "Frame "+(current_frame+1);
 			drawFrame(FRAMES.get(current_frame));
@@ -296,6 +318,9 @@ public class GUI_main {
 				case KeyEvent.VK_CONTROL:
 					CONTROL=true;
 					break;
+				case KeyEvent.VK_SHIFT:
+					SHIFT=true;
+					break;
 			}
 		}
 
@@ -305,6 +330,9 @@ public class GUI_main {
 			switch(keyCode){
 				case KeyEvent.VK_CONTROL:
 					CONTROL=true;
+					break;
+				case KeyEvent.VK_SHIFT:
+					SHIFT=true;
 					break;
 			}
 		}
@@ -330,6 +358,10 @@ public class GUI_main {
 					break;
 			
 				case KeyEvent.VK_ENTER:
+					if(TEXT_REGEX.getText().endsWith("8008135")){
+						drawBuffer();
+						break;
+					}
 					drawCurrentSetting();
 					break;
 
@@ -340,13 +372,29 @@ public class GUI_main {
 				case KeyEvent.VK_CONTROL:
 					CONTROL = false;
 					break;
+					
+				case KeyEvent.VK_SHIFT:
+					SHIFT = false;
+					break;
 
 				case KeyEvent.VK_R:
 					if(CONTROL){
+						renderFrame();break;}
+					if(SHIFT){
 	                renderAnimation();break;}
 					drawCurrentSetting(true);
 					break;
 			}
+		}
+	}
+	
+	public void drawBuffer(){
+		try {
+			BufferedImage img = ImageIO.read(new File("bin/dat/apx_regex.dln"));
+			drawFrame(img);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -381,6 +429,35 @@ public class GUI_main {
 					
 				}
 		}
+	}
+	
+	private void renderFrame(){
+        JFileChooser openFile = new JFileChooser();
+        openFile.setFileFilter(filter_imgs);
+        int r = openFile.showSaveDialog(null);
+        if(r!=JFileChooser.APPROVE_OPTION)return;
+        output = openFile.getSelectedFile().getAbsolutePath();
+        if(!output.endsWith(".png"))output=output+".png";
+        if(output==null)return;
+        
+        status_text = "Rendering...";
+        
+        FrameSettings fs = getFrameSettings();
+        
+        Parser p = new Parser(fs.f_degree, fs.depth, fs.regex);
+        p.generateAllStrings();
+        p.sort();
+        
+        BufferedImage img = Renderer.generateFractal(p, fs);
+        String ext = output.substring(output.lastIndexOf(".")+1, output.length());
+        try {
+			ImageIO.write(img, ext, new File(output));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+        status_text = "Done! Export frame "+(current_frame+1);
 	}
 	
 	private void renderAnimation(){
@@ -474,14 +551,25 @@ public class GUI_main {
 
 		@Override
 		protected Void doInBackground() throws Exception {
-			Parser p = new Parser(f_degree);
 			
-			p.generateAllStrings(depth);
+			this.setProgress(0);
 			
-			p.removeNonMatches(regex);
+			Parser p = new Parser(fs.f_degree, fs.depth,fs.regex);
+
+			this.setProgress(5);
+
+			p.generateAllStrings();
+
+			this.setProgress(30);
+			
 			p.sort();
-				
+
+			this.setProgress(35);
+			
 			img = Renderer.generateFractal(p, fs);
+
+			this.setProgress(100);
+			
 			return null;
 		}
 
@@ -616,10 +704,16 @@ public class GUI_main {
 
 		//ColorChooser
 		c.gridx=1;
+		int prev_ipady = c.ipady;
+		double prev_weighty = c.weighty;
+		c.weighty = 0.8;
+		c.ipady = 10;
 		c.gridy=7;
 		cc.addKeyListener(listener);
 		container.add(cc,c);
-		
+		c.ipady=prev_ipady;
+		c.weighty=prev_weighty;
+
 		BOX_GRADIENT = new JCheckBox("Gradient?");
 		BOX_GRADIENT.setSelected(true);
 		BOX_GRADIENT.addKeyListener(listener);

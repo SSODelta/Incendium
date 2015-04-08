@@ -1,13 +1,10 @@
-package com.ignatieff.tractals;
+package com.ignatieff.incendium.core;
 
 import java.awt.Color;
 import java.awt.Polygon;
 
-import org.matheclipse.parser.client.eval.DoubleEvaluator;
-import org.matheclipse.parser.client.eval.DoubleVariable;
-import org.matheclipse.parser.client.eval.IDoubleValue;
 //http://webmup.com/2snIr/
-public class Triangle implements Comparable<Triangle> {
+public class RegularPolygon implements Comparable<RegularPolygon> {
 	private Point pos;
 	private double m, phi;
 	private int depth, degree;
@@ -17,23 +14,23 @@ public class Triangle implements Comparable<Triangle> {
 
 	public static Point ORIGO = new Point(0,0);
 	
-	public Triangle(int degree){
+	public RegularPolygon(int degree){
 		this(0, degree);
 	}
 	
-	public Triangle(double m, int degree){
+	public RegularPolygon(double m, int degree){
 		this(m,degree,0);
 	}
 	
-	public Triangle(double m, int degree, double phi){
+	public RegularPolygon(double m, int degree, double phi){
 		this(ORIGO, degree,m,phi);
 	}
 	
-	public Triangle(Point p, int degree, double m, double phi){
+	public RegularPolygon(Point p, int degree, double m, double phi){
 		this(p,Color.WHITE, degree,-1, m, phi);
 	}
 	
-	public Triangle(Point p, Color c, int degree, int depth, double m, double phi){
+	public RegularPolygon(Point p, Color c, int degree, int depth, double m, double phi){
 		this.setC(c);
 		this.setDegree(degree);
 		this.setPos(p);
@@ -92,20 +89,15 @@ public class Triangle implements Comparable<Triangle> {
 		return sh;
 	}
 	
-	public static Point getPositionFromString(double m, double theta, double r, String s, double z, String f_degree){
-		return getPositionFromString(theta,0,r,toShortArr(s),z, f_degree).times(m);
+	public static Point getPositionFromString(double m, double theta, double r, String s, double z, int[] degrees){
+		return getPositionFromString(theta,0,r,toShortArr(s),z, degrees).times(m);
 	}
 	
-	public static Point getPositionFromString(double theta, int k, double r, short[] c, double z, String f_degree){
+	public static Point getPositionFromString(double theta, int k, double r, short[] c, double z, int[] degrees){
 		if(c.length==0)return EMPTY;
 		
-		IDoubleValue val = new DoubleVariable(0.0);
-		DoubleEvaluator engine = new DoubleEvaluator();
-		engine.defineVariable("d",val);
-		
-		val.setValue(k);
-		int max = (int)engine.evaluate(f_degree);
-		Point p = getPositionFromChar(theta, k, c[0],z, max).add(getPositionFromString(theta, k+1, r, splice(c),z, f_degree).times(r));
+		int max = degrees[k];
+		Point p = getPositionFromChar(theta, k, c[0],z, max).add(getPositionFromString(theta, k+1, r, splice(c),z, degrees).times(r));
 		return p;
 	}
 	
@@ -121,7 +113,7 @@ public class Triangle implements Comparable<Triangle> {
 			s[i-1]=c[i];
 		return s;
 	}
-
+	
 	public Point getPos() {
 		return pos;
 	}
@@ -194,7 +186,7 @@ public class Triangle implements Comparable<Triangle> {
 	}
 
 	@Override
-	public int compareTo(Triangle o) {
+	public int compareTo(RegularPolygon o) {
 		return (int)(this.getM() - o.getM());
 	}
 }

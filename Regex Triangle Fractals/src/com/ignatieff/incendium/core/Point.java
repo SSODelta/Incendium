@@ -1,4 +1,4 @@
-package com.ignatieff.tractals;
+package com.ignatieff.incendium.core;
 
 public class Point {
 	public double x = 0, y = 0;

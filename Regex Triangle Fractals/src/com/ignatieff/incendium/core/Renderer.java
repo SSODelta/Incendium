@@ -1,4 +1,4 @@
-package com.ignatieff.tractals;
+package com.ignatieff.incendium.core;
 
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
@@ -13,7 +13,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import com.ignatieff.tractals.gui.FrameSettings;
+import com.ignatieff.incendium.gui.FrameSettings;
 
 public class Renderer {
 	
@@ -22,13 +22,18 @@ public class Renderer {
 	}
 	
 	public static BufferedImage generateFractal(Parser p, String regex, ColorList cl, int imageSize, double rotation, double rpe, double r, int depth, String f_degree){
-		double m = 0.9*imageSize/2 * (1.0-r) / (1.0 - Math.pow(r, depth));
 		
-		Triangle[] t = Parser.getTriangles(p, regex, cl, f_degree, rotation, m, rpe, r, depth);
+		
+		double m = 0.9*imageSize/2 * (1.0-r) / (1.0 - Math.pow(r, depth+1));
+
+		RegularPolygon[] t = Parser.getRegularPolygons(p, regex, cl, f_degree, rotation, m, rpe, r, depth);
 		
 		Renderer rend = new Renderer(imageSize);
-		rend.drawTriangles(t);
+
+		rend.drawRegularPolygons(t);
+
 		rend.writeToImage(regex);
+				
 		return rend.img;
 	}
 	
@@ -52,9 +57,9 @@ public class Renderer {
 		}
 	}
 	
-	public void drawTriangles(Triangle[] t){
-		for(Triangle k : t)
-			drawTriangle(k);
+	public void drawRegularPolygons(RegularPolygon[] t){
+		for(RegularPolygon k : t)
+			drawRegularPolygon(k);
 	}
 	
 	/**
@@ -76,7 +81,7 @@ public class Renderer {
 		g.dispose();
 	}
 	
-	public void drawTriangle(Triangle t){
+	public void drawRegularPolygon(RegularPolygon t){
 		
 		g.setColor(t.getC());
 		
