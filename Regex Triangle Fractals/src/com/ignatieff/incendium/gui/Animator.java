@@ -1,4 +1,4 @@
-package com.ignatieff.incendium.core;
+package com.ignatieff.incendium.gui;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -13,6 +13,10 @@ import org.apache.commons.exec.Executor;
 import org.matheclipse.parser.client.eval.DoubleEvaluator;
 import org.matheclipse.parser.client.eval.DoubleVariable;
 import org.matheclipse.parser.client.eval.IDoubleValue;
+
+import com.ignatieff.incendium.core.ColorList;
+import com.ignatieff.incendium.core.Parser;
+import com.ignatieff.incendium.core.Renderer;
 
 public class Animator {
 	

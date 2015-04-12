@@ -42,7 +42,6 @@ import org.matheclipse.parser.client.eval.DoubleEvaluator;
 import org.matheclipse.parser.client.eval.DoubleVariable;
 import org.matheclipse.parser.client.eval.IDoubleValue;
 
-import com.ignatieff.incendium.core.Animator;
 import com.ignatieff.incendium.core.ColorList;
 import com.ignatieff.incendium.core.Parser;
 import com.ignatieff.incendium.core.Renderer;
