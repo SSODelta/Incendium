@@ -1,6 +1,6 @@
 # Incendium
 
-Incendium is a fractal animation program written in Java 7. It includes a both a core engine which is used to generate the actual fractals, and a GUI which enables a user to use this engine. To download the GUI, head down to **Binaries** and download ```incendium-gui-vXXXX.jar```. If however, you just want to use the core engine, download ```incendium-core-vXXXX.jar``` and reference it as usual in your IDE of choice.
+Incendium is a fractal animation program written in Java 7. It includes a both a core engine which is used to generate the actual fractals, and a stand-alone executable which enables a user to use this engine with a GUI. To download the GUI, head down to **Binaries** and download ```incendium-gui-vXXXX.jar```. If however, you just want to use the core engine, download ```incendium-core-vXXXX.jar``` and reference it as usual in your IDE of choice.
 
 For the core engine, you will need to download all dependencies listed under **Core** and reference them as well if you want the program to work. If you're just downloading the GUI, all libraries will be packaged into the .jar file and you will only need to run it as ```java -jar incendium-core-vXXXX.jar```. 
  
